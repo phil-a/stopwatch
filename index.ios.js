@@ -2,18 +2,31 @@ var React = require('react-native');
 var {
   Text,
   View,
-  AppRegistry
+  AppRegistry,
+  StyleSheet
 } = React;
 
 var StopWatch = React.createClass({
   render: function() {
     return (
-      <View>
-        <Text>
-          00:00.00
-        </Text>
-        {this.startStopButton()}
-        {this.lapButton()}
+      <View style={styles.container}>
+
+        <View style={[styles.header, this.border('yellow')]}>
+          <View style={this.border('red')}>
+            <Text>
+              00:00.00
+            </Text>
+          </View>
+          <View style={this.border('green')}>
+            {this.startStopButton()}
+            {this.lapButton()}
+          </View>
+        </View>
+
+        <View style={[styles.footer, this.border('blue')]}>
+          <Text>List of laps</Text>
+        </View>
+
       </View>
     );
   },
@@ -34,6 +47,25 @@ var StopWatch = React.createClass({
         </Text>
       </View>
     );
+  },
+  border: function(color) {
+    return {
+      borderColor: color,
+      borderWidth: 10
+    }
+  }
+});
+
+var styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'stretch',
+  },
+  header: {
+    flex: 1
+  },
+  footer: {
+    flex: 1
   }
 });
 
