@@ -1,51 +1,164 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- */
-
-import React, {
-  AppRegistry,
-  Component,
-  StyleSheet,
+var formatTime = require('minutes-seconds-milliseconds');
+var React = require('react-native');
+var {
   Text,
-  View
-} from 'react-native';
+  View,
+  TouchableHighlight,
+  AppRegistry,
+  StyleSheet
+} = React;
 
-class stopwatch extends Component {
-  render() {
+var StopWatch = React.createClass({
+  getInitialState: function() {
+    return {
+      timeElapsed: null,
+      running: false,
+      startTime: null,
+      laps: []
+    }
+  },
+  render: function() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Shake or press menu button for dev menu
-        </Text>
+
+        <View style={[styles.header, this.border('yellow')]}>
+          <View style={[styles.timerWrapper, this.border('red')]}>
+            <Text style={styles.timer}>
+              {formatTime(this.state.timeElapsed)}
+            </Text>
+          </View>
+          <View style={[styles.buttonWrapper, this.border('green')]}>
+            {this.startStopButton()}
+            {this.lapButton()}
+          </View>
+        </View>
+
+        <View style={[styles.footer, this.border('blue')]}>
+          {this.laps()}
+        </View>
       </View>
     );
+  },
+  laps: function () {
+    return this.state.laps.map(function(time, index) {
+      return (
+        <View style={styles.lap}>
+          <Text style={styles.lapText}>
+            Lap#{index + 1}
+          </Text>
+          <Text style={styles.lapText}>
+            {formatTime(time)}
+          </Text>
+        </View>
+      );
+    });
+  },
+  startStopButton: function() {
+    var style = this.state.running? styles.stopButton : styles.startButton;
+    var underlayColor = this.state.running? "#FF9999" : "#99FF99";
+    return (
+      <TouchableHighlight
+      onPress={this.handleStartPress}
+      underlayColor={underlayColor}
+      style={[styles.button, style]}>
+        <Text>
+          {this.state.running ? 'Stop' : 'Start'}
+        </Text>
+      </TouchableHighlight>
+    );
+  },
+  lapButton: function() {
+    return (
+      <TouchableHighlight
+      onPress={this.handleLapPress}
+      underlayColor="lightblue"
+      style={[styles.button, styles.lapButton]}>
+        <Text>
+          Lap
+        </Text>
+      </TouchableHighlight>
+    );
+  },
+  handleStartPress: function() {
+    if (this.state.running) {
+      clearInterval(this.interval);
+      this.setState({running: false});
+      return
+    }
+    var startTime = new Date();
+    this.setState({startTime: new Date()});
+    this.interval = setInterval(() => {
+      this.setState({
+        timeElapsed: new Date() - this.state.startTime,
+        running: true
+      });
+    }, 30);
+  },
+  handleLapPress: function() {
+    var lap = this.state.timeElapsed;
+    this.setState({
+      startTime: new Date(),
+      laps: this.state.laps.concat([lap])
+    });
+  },
+  border: function(color) {
+    return {
+      borderColor: color,
+      borderWidth: 10
+    }
   }
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
 });
 
-AppRegistry.registerComponent('stopwatch', () => stopwatch);
+var styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'stretch',
+  },
+  header: {
+    flex: 1
+  },
+  footer: {
+    flex: 1
+  },
+  timerWrapper: {
+    flex: 5,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  timer: {
+    fontSize: 60
+  },
+  buttonWrapper: {
+    flex: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'honeydew'
+  },
+  button: {
+    borderWidth: 2,
+    height: 100,
+    width: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  startButton: {
+    borderColor: '#00CC00'
+  },
+  stopButton: {
+    borderColor: '#CC0000'
+  },
+  lapButton: {
+    borderColor: '#0000CC'
+  },
+  lap: {
+    justifyContent: 'space-around',
+    flexDirection: 'row'
+  },
+  lapText: {
+    fontSize: 30
+  }
+});
+
+AppRegistry.registerComponent('stopwatch', () => StopWatch);
